@@ -1,21 +1,22 @@
+import 'package:cart3d/app/components/appbar/customAppBar.dart';
 import 'package:cart3d/app/screens/product/controller/productController.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:model_viewer_plus/model_viewer_plus.dart';
 
 class Productscreen extends GetView<Productcontroller> {
+
   @override
   Widget build(BuildContext context) {
+    final product = controller.selectedProduct.value!;
     return Scaffold(
-      appBar: AppBar(title: Text('Product Details')),
+      appBar: Customappbar(title: product.title),
       body: Obx(() {
         if (controller.selectedProduct.value == null) {
           return Center(
             child: Text('No product selected'),
           );
         }
-
-        final product = controller.selectedProduct.value!;
 
         return SingleChildScrollView(
           child: Column(
@@ -32,7 +33,7 @@ class Productscreen extends GetView<Productcontroller> {
                   ar: false,
                   autoRotate: true,
                   cameraControls: true,
-                  backgroundColor: Colors.grey,
+                  backgroundColor: Color(0xffffffff),
                 ),
               ),
               
