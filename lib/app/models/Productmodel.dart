@@ -27,7 +27,7 @@ class Productmodel {
 
   factory Productmodel.fromJson(Map<String, dynamic> json) {
     return Productmodel(
-      id: json['id'],
+      id: (json['id']).toString(),
       title: json['title'],
       description: json['description'],
       price: json['price'],
