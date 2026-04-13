@@ -1,3 +1,6 @@
+import 'package:cart3d/app/components/common/neon_glow_container.dart';
+import 'package:cart3d/app/theme/app_colors.dart';
+import 'package:cart3d/app/theme/app_styles.dart';
 import 'package:flutter/material.dart';
 
 class Productcard extends StatelessWidget {
@@ -15,28 +18,51 @@ class Productcard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return GestureDetector(
-      onTap: ontap,
-      child: Card(
-        color: Colors.transparent,
-        child: Padding(
-          padding: const EdgeInsets.all(8.0),
+    final ThemeData theme = Theme.of(context);
+    return TweenAnimationBuilder<double>(
+      duration: const Duration(milliseconds: 220),
+      curve: Curves.easeOutCubic,
+      tween: Tween<double>(begin: 1, end: 1),
+      builder: (context, scale, child) {
+        return Transform.scale(scale: scale, child: child);
+      },
+      child: InkWell(
+        borderRadius: AppStyles.borderRadiusMd,
+        onTap: ontap,
+        child: NeonGlowContainer(
+          padding: AppStyles.cardPadding,
+          gradient: AppColors.surfaceGradient,
           child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               Expanded(
                 child: ClipRRect(
-                  borderRadius: BorderRadiusGeometry.circular(15),
+                  borderRadius: AppStyles.borderRadiusSm,
                   child: Image.network(
                     imgUrl,
                     width: double.infinity,
                     fit: BoxFit.cover,
-                    errorBuilder: (context, error, stackTrace) =>
-                        Icon(Icons.broken_image),
+                    errorBuilder: (context, error, stackTrace) => const Icon(
+                      Icons.broken_image_rounded,
+                      color: AppColors.textSecondary,
+                    ),
                   ),
                 ),
               ),
-              Text(title, style: TextStyle(fontWeight: FontWeight.bold)),
-              Text(description,overflow: TextOverflow.ellipsis,),
+              const SizedBox(height: 12),
+              Text(
+                title,
+                maxLines: 1,
+                overflow: TextOverflow.ellipsis,
+                style: theme.textTheme.titleMedium,
+              ),
+              const SizedBox(height: 4),
+              Text(
+                description,
+                maxLines: 1,
+                overflow: TextOverflow.ellipsis,
+                style: theme.textTheme.bodySmall,
+              ),
             ],
           ),
         ),

@@ -1,58 +1,76 @@
 import 'dart:convert';
 import 'package:cart3d/app/models/Productmodel.dart';
-import 'package:cart3d/app/models/postmodel.dart';
+import 'package:flutter/foundation.dart';
 import 'package:flutter/services.dart';
 import 'package:get/get.dart';
-import 'package:http/http.dart' as http;
 
 class Homecontroller extends GetxController {
-  RxList posts = [].obs;
-  RxList products = [].obs;
+  final RxList<Productmodel> products = <Productmodel>[].obs;
+  final RxInt selectedTab = 0.obs;
+  final RxString searchQuery = ''.obs;
 
   @override
   void onInit() {
     super.onInit();
-    // getData();
     get3DData();
   }
 
-  Future<dynamic> getData() async {
-    const String URL = 'https://jsonplaceholder.typicode.com/posts';
+  void setTab(int index) {
+    selectedTab.value = index;
+  }
 
-    final response = await http.get(Uri.parse(URL));
+  void setSearchQuery(String query) {
+    searchQuery.value = query;
+  }
 
-    if (response.statusCode == 200) {
-      final data = jsonDecode(response.body);
+  List<Productmodel> get filteredProducts {
+    final query = searchQuery.value.trim().toLowerCase();
+    var list = products.toList();
 
-      print('data fetched successfully');
+    if (query.isNotEmpty) {
+      list = list.where((product) {
+        final title = product.title.toLowerCase();
+        final description = product.description.toLowerCase();
+        final category = product.category.toLowerCase();
+        return title.contains(query) || description.contains(query) || category.contains(query);
+      }).toList();
+    }
 
-      // print(data);
-
-      List<PostModel> RawList = (data as List)
-          .map((e) => PostModel.fromJson(e))
-          .toList();
-
-      posts.assignAll(RawList);
-
-      return data;
-    } else {
-      print(response.statusCode);
+    switch (selectedTab.value) {
+      case 1:
+        return list.where((item) => item.isfeatured).toList();
+      case 2:
+        return list.where((item) => item.price <= 400).toList();
+      case 3:
+        return list.where((item) => item.rating >= 4.5).toList();
+      default:
+        return list;
     }
   }
 
-  Future<dynamic> get3DData() async {
+  String get selectedTabLabel {
+    switch (selectedTab.value) {
+      case 1:
+        return 'Featured';
+      case 2:
+        return 'Budget';
+      case 3:
+        return 'Top rated';
+      default:
+        return 'All products';
+    }
+  }
+
+  Future<void> get3DData() async {
     try {
-      final RawDetails = await rootBundle.loadString('data/data.json');
-      final data = jsonDecode(RawDetails);
+      final rawDetails = await rootBundle.loadString('data/data.json');
+      final data = jsonDecode(rawDetails);
       final List list = data['products'];
 
-      final Rawlist = list.map((e) => Productmodel.fromJson(e)).toList();
-
-      products.assignAll(Rawlist);
-      // print(data);
-      return data;
+      final productList = list.map((e) => Productmodel.fromJson(e)).toList();
+      products.assignAll(productList);
     } catch (e) {
-      print(e);
+      debugPrint('Failed to load 3D data: $e');
     }
   }
 }

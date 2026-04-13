@@ -1,5 +1,5 @@
-import 'package:cart3d/app/routes/initialbinding.dart';
 import 'package:cart3d/app/routes/pages.dart';
+import 'package:cart3d/app/theme/app_theme.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get_navigation/get_navigation.dart';
 
@@ -14,14 +14,12 @@ class MyApp extends StatelessWidget {
   Widget build(BuildContext context) {
     return GetMaterialApp(
       debugShowCheckedModeBanner: false,
-      title: 'Flutter Demo',
-      theme: ThemeData(
-        // scaffoldBackgroundColor: Color(0xffffffff),
-        colorScheme: ColorScheme.fromSeed(seedColor: Colors.deepPurple),
-      ),
-      initialRoute: Pages.INITIAL,
+      title: 'Cart3D',
+      theme: AppTheme.lightTheme,
+      darkTheme: AppTheme.darkTheme,
+      themeMode: ThemeMode.dark,
+      initialRoute: Pages.home,
       getPages: Pages.routes,
-      initialBinding: Initialbinding(),
     );
   }
 }
