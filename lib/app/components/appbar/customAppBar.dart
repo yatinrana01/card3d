@@ -11,6 +11,7 @@ class Customappbar extends StatelessWidget implements PreferredSizeWidget {
     return AppBar(
       title: Text(title.toUpperCase(), style: theme.appBarTheme.titleTextStyle),
       centerTitle: true,
+      automaticallyImplyLeading: false,
     );
   }
 

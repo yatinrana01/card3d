@@ -4,10 +4,32 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter/services.dart';
 import 'package:get/get.dart';
 
+class _DataFetchParams {
+  final String jsonData;
+  _DataFetchParams(this.jsonData);
+}
+
+List<Productmodel> _fetchAndParseInIsolate(_DataFetchParams params) {
+  try {
+    final data = jsonDecode(params.jsonData);
+    final products = data['products'] as List<dynamic>;
+    return products
+        .map((item) => Productmodel.fromJson(item as Map<String, dynamic>))
+        .toList();
+  } catch (e) {
+    rethrow;
+  }
+}
+
 class Homecontroller extends GetxController {
-  final RxList<Productmodel> products = <Productmodel>[].obs;
-  final RxInt selectedTab = 0.obs;
-  final RxString searchQuery = ''.obs;
+  final RxList<Productmodel> allProducts = <Productmodel>[].obs;
+  final RxList<Productmodel> displayedProducts = <Productmodel>[].obs;
+  final RxBool isLoading = true.obs;
+  final RxBool isLoadingMore = false.obs;
+  final RxString loadError = ''.obs;
+  
+  static const int pageSize = 6;
+  int _currentPage = 0;
 
   @override
   void onInit() {
@@ -15,62 +37,46 @@ class Homecontroller extends GetxController {
     get3DData();
   }
 
-  void setTab(int index) {
-    selectedTab.value = index;
-  }
-
-  void setSearchQuery(String query) {
-    searchQuery.value = query;
-  }
-
-  List<Productmodel> get filteredProducts {
-    final query = searchQuery.value.trim().toLowerCase();
-    var list = products.toList();
-
-    if (query.isNotEmpty) {
-      list = list.where((product) {
-        final title = product.title.toLowerCase();
-        final description = product.description.toLowerCase();
-        final category = product.category.toLowerCase();
-        return title.contains(query) || description.contains(query) || category.contains(query);
-      }).toList();
-    }
-
-    switch (selectedTab.value) {
-      case 1:
-        return list.where((item) => item.isfeatured).toList();
-      case 2:
-        return list.where((item) => item.price <= 400).toList();
-      case 3:
-        return list.where((item) => item.rating >= 4.5).toList();
-      default:
-        return list;
-    }
-  }
-
-  String get selectedTabLabel {
-    switch (selectedTab.value) {
-      case 1:
-        return 'Featured';
-      case 2:
-        return 'Budget';
-      case 3:
-        return 'Top rated';
-      default:
-        return 'All products';
-    }
-  }
-
   Future<void> get3DData() async {
+    isLoading.value = true;
+    loadError.value = '';
+
     try {
       final rawDetails = await rootBundle.loadString('data/data.json');
-      final data = jsonDecode(rawDetails);
-      final List list = data['products'];
-
-      final productList = list.map((e) => Productmodel.fromJson(e)).toList();
-      products.assignAll(productList);
+      final params = _DataFetchParams(rawDetails);
+      final productList = await compute(_fetchAndParseInIsolate, params);
+      allProducts.assignAll(productList);
+      _loadNextPage();
     } catch (e) {
+      loadError.value = 'Failed to load products.';
       debugPrint('Failed to load 3D data: $e');
+    } finally {
+      isLoading.value = false;
     }
+  }
+
+  void _loadNextPage() {
+    if (_currentPage * pageSize >= allProducts.length) return;
+    
+    final start = _currentPage * pageSize;
+    final end = (start + pageSize).clamp(0, allProducts.length);
+    
+    if (start < allProducts.length) {
+      displayedProducts.addAll(allProducts.sublist(start, end));
+      _currentPage++;
+    }
+  }
+
+  void loadMore() {
+    if (isLoadingMore.value || _currentPage * pageSize >= allProducts.length) return;
+    isLoadingMore.value = true;
+    Future.delayed(const Duration(milliseconds: 300), () {
+      _loadNextPage();
+      isLoadingMore.value = false;
+    });
+  }
+
+  bool hasMoreProducts() {
+    return _currentPage * pageSize < allProducts.length;
   }
 }
