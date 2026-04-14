@@ -5,8 +5,8 @@ import 'package:cart3d/app/components/productCard/ProductCard.dart';
 import 'package:cart3d/app/models/Productmodel.dart';
 import 'package:cart3d/app/screens/home/controller/homecontroller.dart';
 import 'package:cart3d/app/screens/product/view/productScreen.dart';
-import 'package:cart3d/app/theme/app_colors.dart';
-import 'package:cart3d/app/theme/app_styles.dart';
+import 'package:cart3d/app/customTheme/app_colors.dart';
+import 'package:cart3d/app/customTheme/app_styles.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 
@@ -66,27 +66,38 @@ class Homescreen extends GetView<Homecontroller> {
   }
 
   Widget _buildProductGrid(List<Productmodel> productList) {
-    return GridView.builder(
-      itemCount: productList.length + (controller.hasMoreProducts() ? 1 : 0),
-      gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
-        crossAxisCount: 2,
-        childAspectRatio: 0.72,
-        crossAxisSpacing: 14,
-        mainAxisSpacing: 14,
-      ),
-      itemBuilder: (context, index) {
-        if (index >= productList.length) {
-          Future.microtask(() => controller.loadMore());
-          return const Center(child: CircularProgressIndicator());
+    return NotificationListener<ScrollNotification>(
+      onNotification: (notification) {
+        if (notification.metrics.pixels >=
+            notification.metrics.maxScrollExtent - 240) {
+          controller.loadMoreIfNeeded();
         }
-        
-        final product = productList[index];
-        return Productcard(
-          title: product.title,
-          imgUrl: product.thumbnail,
-          ontap: () => _showProductModal(context, product),
-        );
+        return false;
       },
+      child: Obx(
+        () => GridView.builder(
+          itemCount:
+              productList.length + (controller.hasMoreProducts.value ? 1 : 0),
+          gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
+            crossAxisCount: 2,
+            childAspectRatio: 1,
+            crossAxisSpacing: 14,
+            mainAxisSpacing: 14,
+          ),
+          itemBuilder: (context, index) {
+            if (index >= productList.length) {
+              return const Center(child: CircularProgressIndicator());
+            }
+
+            final product = productList[index];
+            return Productcard(
+              title: product.title,
+              imgUrl: product.thumbnail,
+              ontap: () => _showProductModal(context, product),
+            );
+          },
+        ),
+      ),
     );
   }
 
@@ -107,5 +118,4 @@ class Homescreen extends GetView<Homecontroller> {
       ),
     );
   }
-
 }

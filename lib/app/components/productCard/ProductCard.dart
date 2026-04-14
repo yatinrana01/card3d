@@ -1,10 +1,10 @@
-import 'package:cached_network_image/cached_network_image.dart';
-import 'package:cart3d/app/theme/app_colors.dart';
-import 'package:cart3d/app/theme/app_styles.dart';
+import 'package:cart3d/app/components/common/app_network_image.dart';
+import 'package:cart3d/app/customTheme/app_colors.dart';
+import 'package:cart3d/app/customTheme/app_styles.dart';
 import 'package:flutter/material.dart';
 
 class Productcard extends StatelessWidget {
-  final String imgUrl;
+  final String? imgUrl;
   final String title;
   // final String description;
   final VoidCallback? ontap;
@@ -12,7 +12,7 @@ class Productcard extends StatelessWidget {
     super.key,
     required this.title,
     // required this.description,
-    required this.imgUrl,
+    this.imgUrl,
     required this.ontap,
   });
 
@@ -30,57 +30,35 @@ class Productcard extends StatelessWidget {
         borderRadius: AppStyles.borderRadiusMd,
         onTap: ontap,
         child: Container(
-          padding: AppStyles.cardPadding,
+          padding: const EdgeInsets.fromLTRB(8, 8, 8, 6),
           decoration: BoxDecoration(
             color: Theme.of(context).colorScheme.surface,
             borderRadius: AppStyles.borderRadiusMd,
             border: Border.all(
-              color: Theme.of(context).dividerColor,
+              color: AppColors.primary.withValues(alpha: 0.85),
             ),
           ),
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               Expanded(
+                flex: 9,
                 child: ClipRRect(
                   borderRadius: AppStyles.borderRadiusSm,
-                  child: CachedNetworkImage(
-                    imageUrl: imgUrl,
+                  child: AppNetworkImage(
+                    imageUrl: imgUrl ?? AppNetworkImage.fallbackPublicPngUrl,
                     fit: BoxFit.cover,
                     width: double.infinity,
-                    filterQuality: FilterQuality.high,
-                    progressIndicatorBuilder: (context, url, downloadProgress) => Center(
-                      child: CircularProgressIndicator(value: downloadProgress.progress),
-                    ),
-                    errorWidget: (context, url, error) => const Center(
-                      child: Icon(
-                        Icons.broken_image_rounded,
-                        color: AppColors.textSecondary,
-                      ),
-                    ),
-                    imageBuilder: (context, imageProvider) => Image(
-                      image: imageProvider,
-                      fit: BoxFit.cover,
-                      width: double.infinity,
-                      filterQuality: FilterQuality.high,
-                    ),
                   ),
                 ),
               ),
-              const SizedBox(height: 12),
+              const SizedBox(height: 6),
               Text(
                 title,
                 maxLines: 1,
                 overflow: TextOverflow.ellipsis,
-                style: theme.textTheme.titleMedium,
+                style: theme.textTheme.bodySmall,
               ),
-              const SizedBox(height: 4),
-              // Text(
-              //   description,
-              //   maxLines: 1,
-              //   overflow: TextOverflow.ellipsis,
-              //   style: theme.textTheme.bodySmall,
-              // ),
             ],
           ),
         ),

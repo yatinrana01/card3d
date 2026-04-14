@@ -1,82 +1,92 @@
-import 'dart:convert';
+import 'dart:async';
+
+import 'package:cart3d/app/domain/repositories/product_repository.dart';
 import 'package:cart3d/app/models/Productmodel.dart';
-import 'package:flutter/foundation.dart';
-import 'package:flutter/services.dart';
 import 'package:get/get.dart';
 
-class _DataFetchParams {
-  final String jsonData;
-  _DataFetchParams(this.jsonData);
-}
-
-List<Productmodel> _fetchAndParseInIsolate(_DataFetchParams params) {
-  try {
-    final data = jsonDecode(params.jsonData);
-    final products = data['products'] as List<dynamic>;
-    return products
-        .map((item) => Productmodel.fromJson(item as Map<String, dynamic>))
-        .toList();
-  } catch (e) {
-    rethrow;
-  }
-}
-
 class Homecontroller extends GetxController {
+  Homecontroller(this._productRepository);
+
+  final ProductRepository _productRepository;
+
   final RxList<Productmodel> allProducts = <Productmodel>[].obs;
   final RxList<Productmodel> displayedProducts = <Productmodel>[].obs;
   final RxBool isLoading = true.obs;
   final RxBool isLoadingMore = false.obs;
   final RxString loadError = ''.obs;
-  
-  static const int pageSize = 6;
+  final RxBool hasMoreProducts = true.obs;
+
+  static const int pageSize = 8;
   int _currentPage = 0;
+  Timer? _loadMoreDebounce;
 
   @override
   void onInit() {
     super.onInit();
-    get3DData();
+    fetchProducts();
   }
 
-  Future<void> get3DData() async {
+  @override
+  void onClose() {
+    _loadMoreDebounce?.cancel();
+    super.onClose();
+  }
+
+  Future<void> fetchProducts() async {
     isLoading.value = true;
     loadError.value = '';
 
     try {
-      final rawDetails = await rootBundle.loadString('data/data.json');
-      final params = _DataFetchParams(rawDetails);
-      final productList = await compute(_fetchAndParseInIsolate, params);
+      final List<Productmodel> productList = await _productRepository
+          .getProducts();
       allProducts.assignAll(productList);
+      _currentPage = 0;
+      displayedProducts.clear();
+      hasMoreProducts.value = true;
       _loadNextPage();
     } catch (e) {
       loadError.value = 'Failed to load products.';
-      debugPrint('Failed to load 3D data: $e');
     } finally {
       isLoading.value = false;
     }
   }
 
   void _loadNextPage() {
-    if (_currentPage * pageSize >= allProducts.length) return;
-    
-    final start = _currentPage * pageSize;
-    final end = (start + pageSize).clamp(0, allProducts.length);
-    
+    if (_currentPage * pageSize >= allProducts.length) {
+      hasMoreProducts.value = false;
+      return;
+    }
+
+    final int start = _currentPage * pageSize;
+    final int end = (start + pageSize).clamp(0, allProducts.length);
+
     if (start < allProducts.length) {
       displayedProducts.addAll(allProducts.sublist(start, end));
       _currentPage++;
     }
+    hasMoreProducts.value = _currentPage * pageSize < allProducts.length;
   }
 
-  void loadMore() {
-    if (isLoadingMore.value || _currentPage * pageSize >= allProducts.length) return;
-    isLoadingMore.value = true;
-    Future.delayed(const Duration(milliseconds: 300), () {
-      _loadNextPage();
-      isLoadingMore.value = false;
+  void loadMoreIfNeeded() {
+    if (isLoadingMore.value || !hasMoreProducts.value) {
+      return;
+    }
+
+    _loadMoreDebounce?.cancel();
+    _loadMoreDebounce = Timer(const Duration(milliseconds: 120), () {
+      _loadMore();
     });
   }
 
-  bool hasMoreProducts() {
-    return _currentPage * pageSize < allProducts.length;
+  void _loadMore() {
+    if (isLoadingMore.value || !hasMoreProducts.value) {
+      return;
+    }
+
+    isLoadingMore.value = true;
+    Future<void>.delayed(const Duration(milliseconds: 250), () {
+      _loadNextPage();
+      isLoadingMore.value = false;
+    });
   }
 }

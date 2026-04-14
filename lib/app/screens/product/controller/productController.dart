@@ -1,24 +1,79 @@
+import 'dart:io';
+
 import 'package:cart3d/app/models/Productmodel.dart';
 import 'package:get/get.dart';
 
 class Productcontroller extends GetxController {
-  Rx<Productmodel?> selectedProduct = Rx<Productmodel?>(null);
-  late final Rx<String> activeModelSrc;
+  final Rx<Productmodel?> selectedProduct = Rx<Productmodel?>(null);
+  final RxString activeModelSrc = ''.obs;
+  final RxBool useFallbackModel = false.obs;
+  int _requestToken = 0;
 
-  static const String fallbackModelUrl = 'assets/3d_models/NikeHoodie.glb';
+  static const String fallbackModelUrl =
+      'https://modelviewer.dev/shared-assets/models/Astronaut.glb';
 
   @override
   void onInit() {
     super.onInit();
-    activeModelSrc = Rx<String>(fallbackModelUrl);
-    // Get product from navigation arguments
+
+    // Initialize with fallback
+    activeModelSrc.value = fallbackModelUrl;
+
+    // Handle navigation arguments
     if (Get.arguments != null && Get.arguments is Productmodel) {
-      selectedProduct.value = Get.arguments as Productmodel;
+      setProduct(Get.arguments as Productmodel);
     }
   }
 
-  void setProduct(Productmodel product) {
+  Future<void> setProduct(Productmodel product) async {
     selectedProduct.value = product;
-    activeModelSrc.value = product.model3d.isNotEmpty ? product.model3d : fallbackModelUrl;
+    useFallbackModel.value = false;
+    final int token = ++_requestToken;
+
+    final modelUrl = product.model3d;
+
+    if (modelUrl.isEmpty || !modelUrl.startsWith('http')) {
+      switchToFallbackModel();
+      return;
+    }
+
+    activeModelSrc.value = modelUrl;
+    final bool isReachable = await _isModelReachable(modelUrl);
+    if (token != _requestToken) {
+      return;
+    }
+
+    if (!isReachable) {
+      switchToFallbackModel();
+    }
+  }
+
+  void switchToFallbackModel() {
+    useFallbackModel.value = true;
+    activeModelSrc.value = fallbackModelUrl;
+  }
+
+  Future<bool> _isModelReachable(String modelUrl) async {
+    try {
+      final Uri? uri = Uri.tryParse(modelUrl);
+      if (uri == null) {
+        return false;
+      }
+
+      final HttpClient client = HttpClient()
+        ..connectionTimeout = const Duration(seconds: 4);
+      try {
+        final HttpClientRequest request = await client.getUrl(uri);
+        request.followRedirects = true;
+        final HttpClientResponse response = await request.close().timeout(
+          const Duration(seconds: 5),
+        );
+        return response.statusCode >= 200 && response.statusCode < 400;
+      } finally {
+        client.close(force: true);
+      }
+    } catch (_) {
+      return false;
+    }
   }
 }

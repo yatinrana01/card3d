@@ -9,7 +9,7 @@
       "rating": 4.6,
       "stock": 15,
       "category": "apparel",
-      "thumbnail": "https://images.unsplash.com/photo-1520975922284-9e0ce8276c1f",
+      "thumbnail": "https://images.unsplash.com/photo-1602370463198-086436840055",
       "model3d": "https://modelviewer.dev/shared-assets/models/Astronaut.glb",
       "isFeatured": true
     },
@@ -48,7 +48,7 @@
       "rating": 4.4,
       "stock": 10,
       "category": "furniture",
-      "thumbnail": "https://images.unsplash.com/photo-1582582429416-8a0b9c1f1b64",
+      "thumbnail": "https://images.unsplash.com/photo-1650476524564-f94dc9669067",
       "model3d": "https://modelviewer.dev/shared-assets/models/Chair.glb",
       "isFeatured": true
     },
@@ -113,7 +113,7 @@
       "rating": 4.8,
       "stock": 6,
       "category": "electronics",
-      "thumbnail": "https://images.unsplash.com/photo-1519183071298-a2962be96df2",
+      "thumbnail": "https://plus.unsplash.com/premium_photo-1682124746623-23f28d0cb7b9",
       "model3d": "https://raw.githubusercontent.com/KhronosGroup/glTF-Sample-Models/master/2.0/Helmet/glTF-Binary/Helmet.glb",
       "isFeatured": true
     },
@@ -165,7 +165,7 @@
       "rating": 4.7,
       "stock": 7,
       "category": "sports",
-      "thumbnail": "https://images.unsplash.com/photo-1508973378895-4f7e8d8f0f43",
+      "thumbnail": "https://plus.unsplash.com/premium_photo-1677838847763-0810bff8f40e",
       "model3d": "https://modelviewer.dev/shared-assets/models/Bicycle.glb",
       "isFeatured": true
     },
@@ -256,7 +256,7 @@
       "rating": 4.4,
       "stock": 13,
       "category": "furniture",
-      "thumbnail": "https://images.unsplash.com/photo-1582582429416-8a0b9c1f1b64",
+      "thumbnail": "https://images.unsplash.com/photo-1658046157320-36577125b29b",
       "model3d": "https://modelviewer.dev/shared-assets/models/Chair.glb",
       "isFeatured": false
     },
@@ -360,7 +360,7 @@
       "rating": 4.5,
       "stock": 19,
       "category": "safety",
-      "thumbnail": "https://images.unsplash.com/photo-1519183071298-a2962be96df2",
+      "thumbnail": "https://images.unsplash.com/photo-1693225113452-8ab5cf5f6e7f",
       "model3d": "https://modelviewer.dev/shared-assets/models/Helmet.glb",
       "isFeatured": false
     },

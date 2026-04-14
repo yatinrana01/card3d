@@ -1,9 +1,16 @@
-import 'package:cart3d/app/theme/app_colors.dart';
-import 'package:cart3d/app/theme/app_styles.dart';
+import 'package:cart3d/app/customTheme/app_colors.dart';
+import 'package:cart3d/app/customTheme/app_styles.dart';
 import 'package:flutter/material.dart';
 
-class AppTheme {
-  AppTheme._();
+class CustomTheme {
+  CustomTheme._();
+
+  static ThemeData get darkTheme => CustomThemeData.darkTheme;
+  static ThemeData get lightTheme => CustomThemeData.lightTheme;
+}
+
+class CustomThemeData {
+  CustomThemeData._();
 
   static ThemeData get darkTheme {
     final ColorScheme scheme = const ColorScheme.dark(
