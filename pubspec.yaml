@@ -34,5 +34,6 @@ flutter:
   assets:
     - assets/
     - assets/images/sneaker.png
+    - assets/3d_models/
     - data/
 
